@@ -17,7 +17,7 @@ public class DashboardPage {
     }
 
     public void theEnd() {
-        $(withText("Личны1й кабинет")).shouldBe(Condition.visible);
+        $(withText("Личный кабинет")).shouldBe(Condition.visible);
     }
 
     private int extractBalance(String text) {
