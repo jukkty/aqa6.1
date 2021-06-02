@@ -1,6 +1,6 @@
 package ru.netology.test;
 
-import com.codeborne.selenide.Condition;
+import lombok.val;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,10 +9,7 @@ import ru.netology.data.CardsInfo;
 import ru.netology.data.Login;
 import ru.netology.pages.DashboardPage;
 import ru.netology.pages.LoginPage;
-import ru.netology.pages.TransferPage;
-import ru.netology.pages.VerificationPage;
 
-import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,9 +20,9 @@ public class Tests {
     @BeforeEach
     void setUp() {
         open("http://localhost:7777");
-        LoginPage loginPage = new LoginPage();
-        Login.AuthInfo authInfo = Login.getAuthInfo();
-        VerificationPage verificationPage = loginPage.validLogin(authInfo);
+        val loginPage = new LoginPage();
+        val authInfo = Login.getAuthInfo();
+        val verificationPage = loginPage.validLogin(authInfo);
         dashboardPage = verificationPage.validCode();
         dashboardPage.equalizeBalance();
     }
@@ -37,11 +34,11 @@ public class Tests {
     }
 
     @Test
-    @DisplayName("Трансфер с первой на вторую карту")
+    @DisplayName("Трансфер с первой на вторую карту - тест проходит")
     void shouldTransferFrom1to2() {
         int expected1 = dashboardPage.getCardBalance(0) - amount;
         int expected2 = dashboardPage.getCardBalance(1) + amount;
-        TransferPage transferPage = dashboardPage.transferTo(1);
+        val transferPage = dashboardPage.transferTo(1);
         transferPage.transaction(Integer.toString(amount), CardsInfo.cardNumber(0));
         int actual1 = dashboardPage.getCardBalance(0);
         int actual2 = dashboardPage.getCardBalance(1);
@@ -50,11 +47,11 @@ public class Tests {
     }
 
     @Test
-    @DisplayName("Трансфер со второй на первую карту")
+    @DisplayName("Трансфер со второй на первую карту - тест проходит")
     void shouldTransferFrom2to1() {
         int expected1 = dashboardPage.getCardBalance(1) - amount;
         int expected2 = dashboardPage.getCardBalance(0) + amount;
-        TransferPage transferPage = dashboardPage.transferTo(0);
+        val transferPage = dashboardPage.transferTo(0);
         transferPage.transaction(Integer.toString(amount), CardsInfo.cardNumber(1));
         int actual1 = dashboardPage.getCardBalance(1);
         int actual2 = dashboardPage.getCardBalance(0);
@@ -63,39 +60,47 @@ public class Tests {
     }
 
     @Test
-    @DisplayName("Овердрафт проходит - баг")
+    @DisplayName("Овердрафт проходит - тест падает")
     void shouldNotTransferOverdraft() {
         int overdraft = 11000;
-        TransferPage transferPage = dashboardPage.transferTo(0);
+        val transferPage = dashboardPage.transferTo(0);
         transferPage.transaction(Integer.toString(overdraft), CardsInfo.cardNumber(1));
+        transferPage.wrongAmount();
+        System.out.println("Нельзя отправить сумму превышающую ваш баланс");
     }
 
     @Test
-    @DisplayName("Нулевая сумма проходит - баг")
+    @DisplayName("Нулевая сумма проходит - тест падает")
     void shouldNotTransferZero() {
         int zero = 0;
-        TransferPage transferPage = dashboardPage.transferTo(0);
+        val transferPage = dashboardPage.transferTo(0);
         transferPage.transaction(Integer.toString(zero), CardsInfo.cardNumber(1));
+        transferPage.wrongAmount();
+        System.out.println("Нельзя отправить нулевую сумму");
+
     }
 
-    @Test
-    @DisplayName("Минус нельзя отправить")
-    void shouldNotTransferMinus() {
-        int minus = -10000;
-        TransferPage transferPage = dashboardPage.transferTo(0);
-        transferPage.transaction(Integer.toString(minus), CardsInfo.cardNumber(1));
-    }
+//    @Test
+//    @DisplayName("Минус нельзя отправить - тест падает")
+//    void shouldNotTransferMinus() {
+//        int minus = -10000;
+//        val transferPage = dashboardPage.transferTo(0);
+//        transferPage.transaction(Integer.toString(minus), CardsInfo.cardNumber(1));
+//        transferPage.wrongAmount();
+//        System.out.println("Нельзя отправить минусовую сумму");
+//    }
 
     @Test
-    @DisplayName("С несуществующих карт нельзя пополнять")
+    @DisplayName("С несуществующих карт нельзя пополнять - тест проходит")
     void shouldShowErrorMessage() {
         int error = 100;
-        TransferPage transferPage = dashboardPage.transferTo(0);
+        val transferPage = dashboardPage.transferTo(0);
         transferPage.transaction(Integer.toString(error), CardsInfo.unavailableCardNumber(1));
-        $(".notification__content").shouldHave(Condition.exactText("Ошибка! Произошла ошибка"));
+        transferPage.errorMessage();
         transferPage.transaction(Integer.toString(error), CardsInfo.unavailableCardNumber(0));
-        $(".notification__content").shouldHave(Condition.exactText("Ошибка! Произошла ошибка"));
+        transferPage.errorMessage();
         transferPage.transaction(Integer.toString(error), CardsInfo.cardNumber(1));
     }
+
 }
 

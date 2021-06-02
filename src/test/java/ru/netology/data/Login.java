@@ -1,25 +1,15 @@
 package ru.netology.data;
 
+import lombok.Value;
+
 public class Login {
     private Login() {
     }
 
+    @Value
     public static class AuthInfo {
         String login;
         String password;
-
-        public AuthInfo(String login, String password) {
-            this.login = login;
-            this.password = password;
-        }
-
-        public String getLogin() {
-            return login;
-        }
-
-        public String getPassword() {
-            return password;
-        }
     }
 
     public static AuthInfo getAuthInfo() {

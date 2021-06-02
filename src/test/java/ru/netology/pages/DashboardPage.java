@@ -36,7 +36,6 @@ public class DashboardPage {
 
 
     public TransferPage transferTo(int number) {
-        cards.get(number);
         buttons.get(number).click();
         return new TransferPage();
     }

@@ -1,19 +1,11 @@
 package ru.netology.data;
 
+import lombok.Value;
+
 public class VerificationInfo {
-    private VerificationInfo() {
-    }
-
+    @Value
     public static class VerificationCode {
-        private final String code;
-
-        public VerificationCode(String code) {
-            this.code = code;
-        }
-
-        public String getCode() {
-            return code;
-        }
+        String code;
     }
 
     public static VerificationCode getVerificationCode() {
