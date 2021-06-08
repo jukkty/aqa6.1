@@ -66,7 +66,6 @@ public class Tests {
         val transferPage = dashboardPage.transferTo(0);
         transferPage.transaction(Integer.toString(overdraft), CardsInfo.cardNumber(1));
         transferPage.wrongAmount();
-        System.out.println("Нельзя отправить сумму превышающую ваш баланс");
     }
 
     @Test
@@ -76,19 +75,22 @@ public class Tests {
         val transferPage = dashboardPage.transferTo(0);
         transferPage.transaction(Integer.toString(zero), CardsInfo.cardNumber(1));
         transferPage.wrongAmount();
-        System.out.println("Нельзя отправить нулевую сумму");
-
     }
 
-//    @Test
-//    @DisplayName("Минус нельзя отправить - тест падает")
-//    void shouldNotTransferMinus() {
-//        int minus = -10000;
-//        val transferPage = dashboardPage.transferTo(0);
-//        transferPage.transaction(Integer.toString(minus), CardsInfo.cardNumber(1));
-//        transferPage.wrongAmount();
-//        System.out.println("Нельзя отправить минусовую сумму");
-//    }
+    @Test
+    @DisplayName("Минус нельзя отправить - тест проходит")
+    void shouldNotTransferMinus(){
+        int minus = -10000;
+        //минус на минус дает плюс,поэтому нужно заставить действительно отправлять нужную сумму
+        int expected1 = dashboardPage.getCardBalance(0) - -minus; // 10000 - (-(-10000)=0
+        int expected2 = dashboardPage.getCardBalance(1) + -minus; // 10000 + (-(-10000)=20000
+        val transferPage = dashboardPage.transferTo(1);
+        transferPage.transaction(Integer.toString(minus), CardsInfo.cardNumber(0));
+        int actual1 = dashboardPage.getCardBalance(0);
+        int actual2 = dashboardPage.getCardBalance(1);
+        assertEquals(expected1, actual1);
+        assertEquals(expected2, actual2);
+    }
 
     @Test
     @DisplayName("С несуществующих карт нельзя пополнять - тест проходит")
